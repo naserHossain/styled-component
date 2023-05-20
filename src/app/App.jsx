@@ -23,6 +23,7 @@ const init = {
 
 const App = () => {
     const [state, setState] = useState({ ...init });
+    const [hasError, setHasError] = useState(false);
 
     const mapStateToValue = (state) => {
         return Object.keys(state).reduce((acc, cur) => {
@@ -49,13 +50,18 @@ const App = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
         const values = mapStateToValue(state);
 
         const { isValid, errors } = checkValidity(values);
         if (isValid) {
             console.log(state);
         } else {
-            console.log(errors);
+            const oldState = deepClone(state);
+            Object.keys(errors).forEach((key) => {
+                oldState[key].error = errors[key];
+            });
+            setState(oldState);
         }
     };
 
@@ -139,7 +145,9 @@ const App = () => {
                         onFocus={handleFocus}
                         onBlur={handleBlur}
                     />
-                    <Button type="submit">submit</Button>
+                    <Button disabled={hasError} type="submit">
+                        submit
+                    </Button>
                 </div>
             </form>
         </div>
