@@ -1,86 +1,90 @@
 import React, { useState } from "react";
 import InputGroup from "../components/shared/forms/InputGroup";
 import Button from "../components/ui/buttons/Button";
-import { deepClone } from "../utils/object-utils";
 
 const init = {
+    title: "",
+    bio: "",
+    skills: "",
+};
+
+const init_2 = {
     title: {
         value: "",
-        error: "",
+        errors: "",
         focus: false,
     },
     bio: {
         value: "",
-        error: "",
+        errors: "",
         focus: false,
     },
     skills: {
         value: "",
-        error: "",
+        errors: "",
         focus: false,
     },
 };
 
 const App = () => {
-    const [state, setState] = useState({ ...init });
-
-    const mapStateToValue = (state) => {
-        return Object.keys(state).reduce((acc, cur) => {
-            acc[cur] = state[cur].value;
-            return acc;
-        }, {});
-    };
+    /*    const [values, setValues] = useState({ ...init });
+    const [errors, setErrors] = useState({ ...init });
+    const [focuses, setFocuses] = useState({
+        title: false,
+        bio: false,
+        skills: false,
+    }); */
 
     const handleChange = (e) => {
-        const { name: key, value } = e.target;
-        const values = mapStateToValue(oldState);
+        setValues((prev) => ({
+            ...prev,
+            [e.target.name]: e.target.value,
+        }));
+
+        const key = e.target.name;
         const { errors } = checkValidity(values);
-        const oldState = deepClone(state);
-        oldState[key].value = value;
-
-        if (oldState[key].focus && errors[key]) {
-            oldState[key].error = errors.key;
-        } else {
-            oldState[key].error = "";
+        if (!errors[key]) {
+            setErrors((prev) => ({
+                ...prev,
+                [key]: "",
+            }));
         }
-
-        setState(oldState);
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const values = mapStateToValue(state);
-
         const { isValid, errors } = checkValidity(values);
         if (isValid) {
-            console.log(state);
+            console.log(values);
+            setErrors({ ...errors });
         } else {
-            console.log(errors);
+            setErrors({ ...errors });
         }
     };
 
     const handleFocus = (e) => {
-        const { name } = e.target;
-        const oldState = deepClone(state);
-        oldState[name].focus = true;
-        setState(oldState);
+        setFocuses((prev) => ({
+            ...prev,
+            [e.target.name]: true,
+        }));
     };
 
     const handleBlur = (e) => {
         const key = e.target.name;
-        const values = mapStateToValue(state);
+
         const { errors } = checkValidity(values);
-        const oldState = deepClone(state);
-
-        if (oldState[key].focus && errors[key]) {
-            oldState[key].error = errors.key;
+        if (errors[key] && focuses[key] === true) {
+            setErrors((prev) => ({
+                ...prev,
+                [key]: errors[key],
+            }));
         } else {
-            oldState[key].error = "";
+            setErrors((prev) => ({
+                ...prev,
+                [key]: "",
+            }));
         }
-
-        setState(oldState);
     };
-
     const checkValidity = (values) => {
         const errors = {};
         const { title, bio, skills } = values;
@@ -110,32 +114,32 @@ const App = () => {
                     }}
                 >
                     <InputGroup
-                        value={state.title.value}
+                        value={values.title}
                         label={"Title: "}
                         name={"title"}
                         placeholder={"Software Engineer"}
                         onChange={handleChange}
-                        error={state.title.error}
+                        error={errors.title}
                         onFocus={handleFocus}
                         onBlur={handleBlur}
                     />
                     <InputGroup
-                        value={state.bio.value}
+                        value={values.bio}
                         label={"Bio: "}
                         name={"bio"}
                         placeholder={"I am a software engineer..."}
                         onChange={handleChange}
-                        error={state.bio.error}
+                        error={errors.bio}
                         onFocus={handleFocus}
                         onBlur={handleBlur}
                     />
                     <InputGroup
-                        value={state.skills.value}
+                        value={values.skills}
                         label={"Skills: "}
                         name={"skills"}
                         placeholder={"Javascript, React"}
                         onChange={handleChange}
-                        error={state.skills.error}
+                        error={errors.skills}
                         onFocus={handleFocus}
                         onBlur={handleBlur}
                     />
